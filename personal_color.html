@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>퍼스널 컬러 진단</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 40px; max-width: 600px; margin: auto; }
+    h1 { font-size: 28px; margin-bottom: 20px; }
+    .question { font-size: 18px; margin-bottom: 10px; }
+    .btn { margin: 10px 5px; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 8px; border: none; }
+    .btn:hover { opacity: 0.9; }
+    .a { background-color: #ffe082; }
+    .b { background-color: #90caf9; }
+    .result { margin-top: 30px; font-size: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <h1>🌈 퍼스널 컬러 테스트</h1>
+  <div id="question-container">
+    <div class="question" id="question"></div>
+    <button class="btn a" onclick="answer('A')" id="btnA"></button>
+    <button class="btn b" onclick="answer('B')" id="btnB"></button>
+  </div>
+  <div class="result" id="result"></div>
+
+  <script>
+    const questions = [
+      ["피부 톤은 어떤가요?", "노란기, 따뜻한 느낌", "핑크기, 차가운 느낌"],
+      ["손목 혈관 색은?", "녹색빛", "푸른빛"],
+      ["어울리는 액세서리는?", "골드 주얼리", "실버 주얼리"],
+      ["햇빛을 받으면?", "쉽게 태닝됨", "붉게 탐"],
+      ["어울리는 옷 색은?", "베이지, 올리브, 주황", "네이비, 핑크, 블랙"],
+      ["눈동자 색은 어떤가요?", "밝은 갈색, 호박색", "짙은 갈색, 어두운 느낌"],
+      ["머리카락 색은?", "밝은 갈색, 노란빛", "어두운 갈색, 붉은빛"],
+      ["피부톤 느낌은?", "맑고 투명한 느낌", "하얗고 대비 강한 느낌"],
+      ["어울리는 색감은?", "파스텔, 부드러운 색", "강렬하고 선명한 색"]
+    ];
+
+    let index = 0;
+    let warm = 0, cool = 0;
+    let answers = [];
+
+    function showQuestion() {
+      if (index < questions.length) {
+        document.getElementById("question").textContent = (index + 1) + ". " + questions[index][0];
+        document.getElementById("btnA").textContent = "A. " + questions[index][1];
+        document.getElementById("btnB").textContent = "B. " + questions[index][2];
+      } else {
+        showResult();
+      }
+    }
+
+    function answer(choice) {
+      answers.push(choice);
+      if (index < 5) {
+        choice === 'A' ? warm++ : cool++;
+      }
+      index++;
+      showQuestion();
+    }
+
+    function showResult() {
+      document.getElementById("question-container").style.display = "none";
+      let resultText = "";
+
+      if (warm > cool) {
+        let eye = answers[5];
+        let hair = answers[6];
+        if (eye === 'A' && hair === 'A') {
+          resultText = "🌸 당신은 <strong>봄 웜톤</strong>입니다! 생기 있고 화사한 색상이 어울려요.";
+        } else {
+          resultText = "🍁 당신은 <strong>가을 웜톤</strong>입니다! 따뜻하고 안정감 있는 컬러가 어울려요.";
+        }
+      } else if (cool > warm) {
+        let skin = answers[7];
+        let color = answers[8];
+        if (skin === 'A' && color === 'A') {
+          resultText = "🌊 당신은 <strong>여름 쿨톤</strong>입니다! 부드럽고 은은한 색이 잘 어울립니다.";
+        } else {
+          resultText = "❄️ 당신은 <strong>겨울 쿨톤</strong>입니다! 선명하고 강렬한 색이 잘 어울려요.";
+        }
+      } else {
+        resultText = "🤔 웜톤과 쿨톤이 비슷합니다. 중립톤일 수 있어요!";
+      }
+
+      document.getElementById("result").innerHTML = resultText;
+    }
+
+    showQuestion();
+  </script>
+</body>
+</html>
