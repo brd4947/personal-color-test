@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>퍼스널 컬러 실시간 진단</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 40px;
+      max-width: 600px;
+      margin: auto;
+      background: #f5f5f5;
+      text-align: center;
+    }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 30px;
+    }
+    video, canvas {
+      width: 100%;
+      max-width: 400px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #90caf9;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+    button:hover {
+      background-color: #64b5f6;
+    }
+    .result {
+      margin-top: 30px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    .color-palette {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .swatch {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>📷 실시간 퍼스널 컬러 테스트</h1>
+  <video id="video" autoplay playsinline></video>
+  <br>
+  <button onclick="captureAndAnalyze()">실시간 분석</button>
+
+  <div class="result" id="result"></div>
+  <canvas id="canvas" style="display: none;"></canvas>
+
+  <script>
+    const video = document.getElementById('video');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+      })
+      .catch(err => {
+        alert("카메라에 접근할 수 없습니다: " + err);
+      });
+
+    function captureAndAnalyze() {
+      const canvas = document.getElementById('canvas');
+      const resultEl = document.getElementById('result');
+      const context = canvas.getContext('2d');
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const { r, g, b } = getAverageColor(context, canvas.width, canvas.height);
+      
+      const simulatedTone = determineColorTone(r, g, b);
+      let resultText = "";
+      let palette = [];
+
+      if (simulatedTone === 'spring') {
+        resultText = "🌸 당신은 <strong>봄 웜톤</strong>입니다! 생기 있고 화사한 색상이 어울려요.";
+        palette = ["#FFDAB9", "#FFFACD", "#FFB6C1", "#F08080"];
+      } else if (simulatedTone === 'autumn') {
+        resultText = "🍁 당신은 <strong>가을 웜톤</strong>입니다! 따뜻하고 안정감 있는 컬러가 어울려요.";
+        palette = ["#D2691E", "#A0522D", "#CD853F", "#B8860B"];
+      } else if (simulatedTone === 'summer') {
+        resultText = "🌊 당신은 <strong>여름 쿨톤</strong>입니다! 부드럽고 은은한 색이 잘 어울립니다.";
+        palette = ["#B0E0E6", "#AFEEEE", "#E6E6FA", "#D8BFD8"];
+      } else {
+        resultText = "❄️ 당신은 <strong>겨울 쿨톤</strong>입니다! 선명하고 강렬한 색이 잘 어울려요.";
+        palette = ["#000080", "#8B008B", "#2F4F4F", "#4682B4"];
+      }
+
+      resultEl.innerHTML = resultText;
+      if (palette.length) {
+        const paletteContainer = document.createElement("div");
+        paletteContainer.className = "color-palette";
+        palette.forEach(color => {
+          const swatch = document.createElement("div");
+          swatch.className = "swatch";
+          swatch.style.backgroundColor = color;
+          paletteContainer.appendChild(swatch);
+        });
+        resultEl.appendChild(paletteContainer);
+      }
+    }
+
+    function getAverageColor(context, width, height) {
+      const imageData = context.getImageData(0, 0, width, height);
+      const data = imageData.data;
+      let r = 0, g = 0, b = 0;
+      const length = data.length / 4;
+
+      for (let i = 0; i < data.length; i += 4) {
+        r += data[i];   // Red
+        g += data[i+1]; // Green
+        b += data[i+2]; // Blue
+      }
+
+      r = Math.floor(r / length);
+      g = Math.floor(g / length);
+      b = Math.floor(b / length);
+
+      return { r, g, b };
+    }
+
+    function determineColorTone(r, g, b) {
+      // 기준을 설정하여 색을 분류합니다.
+      if (r > 180 && g < 140 && b < 150) {
+        return 'spring';  // 봄 웜톤
+      } else if (r > 160 && g < 140 && b < 120) {
+        return 'autumn';  // 가을 웜톤
+      } else if (r < 120 && g > 150 && b > 150) {
+        return 'summer';  // 여름 쿨톤
+      } else {
+        return 'winter';  // 겨울 쿨톤
+      }
+    }
+  </script>
+</body>
+</html>
